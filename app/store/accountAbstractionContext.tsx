@@ -5,6 +5,7 @@ import { GelatoRelayPack } from '@safe-global/relay-kit'
 import { MetaTransactionData, MetaTransactionOptions } from '@safe-global/safe-core-sdk-types'
 import { ethers, utils } from 'ethers'
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 
 import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from '@web3auth/base'
 import { Web3AuthOptions } from '@web3auth/modal'
@@ -99,19 +100,30 @@ const AccountAbstractionProvider = ({ children }: { children: JSX.Element }) => 
     // auth-kit implementation
     const loginWeb3Auth = useCallback(async () => {
         try {
+
+            const chainConfig = {
+                chainNamespace: CHAIN_NAMESPACES.EIP155,
+                chainId: chain.id,
+                rpcTarget: chain.rpcUrl,
+                displayName: chain.label,
+                blockExplorer: chain.blockExplorerUrl,
+                ticker: chain.token,
+                tickerName: chain.label,
+            };
+
             const options: Web3AuthOptions = {
                 clientId: process.env.NEXT_PUBLIC__WEB3AUTH_CLIENT_ID || '',
                 web3AuthNetwork: 'testnet',
-                chainConfig: {
-                    chainNamespace: CHAIN_NAMESPACES.EIP155,
-                    chainId: chain.id,
-                    rpcTarget: chain.rpcUrl
-                },
+                chainConfig: chainConfig,
                 uiConfig: {
                     theme: 'dark',
                     loginMethodsOrder: ['google', 'facebook']
                 }
             }
+
+            const privateKeyProvider = new EthereumPrivateKeyProvider({
+                config: { chainConfig },
+            });
 
             const modalConfig = {
                 [WALLET_ADAPTERS.TORUS_EVM]: {
@@ -126,6 +138,7 @@ const AccountAbstractionProvider = ({ children }: { children: JSX.Element }) => 
             }
 
             const openloginAdapter = new OpenloginAdapter({
+                privateKeyProvider,
                 loginSettings: {
                     mfaLevel: 'mandatory'
                 },
@@ -133,8 +146,8 @@ const AccountAbstractionProvider = ({ children }: { children: JSX.Element }) => 
                     uxMode: 'popup',
                     whiteLabel: {
                         name: 'Safe'
-                    }
-                }
+                    },
+                },
             })
 
             const web3AuthModalPack = new Web3AuthModalPack({

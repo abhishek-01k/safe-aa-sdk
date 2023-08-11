@@ -8,9 +8,9 @@ const AuthKit = () => {
     console.log("Env", process.env.NEXT_PUBLIC__WEB3AUTH_CLIENT_ID)
     console.log("Env", process.env.NEXT_APP_PUBLIC_PASSWORD)
 
-    const { loginWeb3Auth, logoutWeb3Auth, isAuthenticated, chain, chainId } = useAccountAbstraction();
+    const { loginWeb3Auth, logoutWeb3Auth, isAuthenticated, chain, chainId, safes, ownerAddress, web3Provider } = useAccountAbstraction();
 
-    console.log("IsAuthenticated", isAuthenticated, chain, chainId);
+    console.log("IsAuthenticated", isAuthenticated, chain, chainId, safes, ownerAddress, web3Provider);
 
     const handleLoginIn = () => {
         console.log("Run")
